@@ -115,21 +115,27 @@ export const SVGText = L.SVG.extend({
     let fontSize = parseFloat(window.getComputedStyle(this._text).getPropertyValue('font-size'));
     let textWidth = this._text.getBoundingClientRect().width;
     const maxWidth = this._parent._path.getBoundingClientRect().width;
-  
+    
+    let increaseCount = 0;
     // Increase font size if text is too small
     while (textWidth < maxWidth - tolerance) {
       fontSize += 0.5; // Adjust step size as needed
       this._text.style.fontSize = `${fontSize}px`;
       textWidth = this._text.getBoundingClientRect().width;
       console.log('increasing')
+      if (increaseCount > 200) break;
+      increaseCount++
     }
   
+    let decreaseCount = 0;
     // Decrease font size if text is too large
     while (textWidth > maxWidth + tolerance) {
       fontSize -= 0.5; // Adjust step size as needed
       this._text.style.fontSize = `${fontSize}px`;
       textWidth = this._text.getBoundingClientRect().width;
       console.log('decreasing')
+      if (decreaseCount > 200) break;
+      decreaseCount++
     }
   }
 });
