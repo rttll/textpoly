@@ -11,7 +11,6 @@ export const TextPolygon = L.Polygon.extend({
   onAdd() {
     L.Path.prototype.onAdd.call(this);
 
-    // Group. Needed to add padding in fitText
     this._group = svgCreate('g');
     this._renderer._rootGroup.appendChild(this._group);
 
@@ -51,7 +50,6 @@ export const TextPolygon = L.Polygon.extend({
     // Guide path
     const id = 'text-path-'.concat(this._leaflet_id, '-', position);
     container.guidePath = svgCreate('path');
-    // container.guidePath.setAttribute('stroke', 'purple');
     container.guidePath.id = id;
     this._group.appendChild(container.guidePath);
 
@@ -79,6 +77,10 @@ export const TextPolygon = L.Polygon.extend({
 
   _updateTextPaths() {
     if (!this._paths) return;
+
+    // Top/left/bottom padding
+    const padding = this._padding();
+    this._group.setAttribute('transform', `translate(${padding}, ${padding})`);
 
     const calculateCenter = (rings) => {
       const topY = (rings[1].y + rings[2].y) / 2;
@@ -109,12 +111,11 @@ export const TextPolygon = L.Polygon.extend({
         const container = this._paths[position];
         container.guidePath.setAttribute('d', def);
 
-        // Fit the text to the parent polygon
-        this._fitText(container);
+        this._fitText(container, position);
       });
   },
 
-  _fitText(container) {
+  _fitText(container, position) {
     const padding = this._padding();
 
     const tolerance = 0.5;
@@ -125,9 +126,6 @@ export const TextPolygon = L.Polygon.extend({
 
     const rightPadding = padding * 2;
     const maxWidth = this._path.getBoundingClientRect().width - rightPadding;
-
-    // Top/left padding
-    this._group.setAttribute('transform', `translate(${padding}, ${padding})`);
 
     let increaseCount = 0;
     while (textWidth < maxWidth - tolerance) {
@@ -157,7 +155,7 @@ export const TextPolygon = L.Polygon.extend({
 
   onRemove() {
     L.Path.prototype.onRemove.call(this);
-    // container.text.removeFrom(this._map);
+    container._group.removeFrom(this._map);
   },
 });
 
